@@ -31,7 +31,12 @@ let todosApi =
             match storage.AddTodo todo with
             | Ok () -> return todo
             | Error e -> return failwith e
-        } }
+        }
+      board =
+        fun () -> async {
+            return Match3.make_board
+        }
+    }
 
 let webApp =
     Remoting.createApi()
