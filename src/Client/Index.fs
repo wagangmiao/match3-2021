@@ -27,10 +27,9 @@ let init(): Model * Cmd<Msg> =
         {
           MouseX = 0.
           MouseY = 0.
-          Board = Match3.make_board 3 3
+          Board = Match3.make_board 2 2
         }
-    let board = Cmd.OfAsync.perform matchApi.board ()
-    let cmd = Cmd.none
+    let cmd = Cmd.OfAsync.perform matchApi.board () Board
     model, cmd
 
 let update (msg: Msg) (model: Model): Model * Cmd<Msg> =
