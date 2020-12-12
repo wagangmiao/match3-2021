@@ -5,7 +5,7 @@ type ActiveBoard<'CellType> =
     {
         height: int
         width: int
-        cells: array<'CellType>
+        cells: 'CellType[,]
     }
 
 type Cell<'T> =
@@ -16,31 +16,19 @@ type Cell<'T> =
     }
 
 module Match3 =
-    let make_board =
+    let make_board height width =
         let b = {
-            height = 3
-            width = 3
-            cells = [|1;2;3;4;5;6;7;8;9|]
+            height = height
+            width = width
+            cells = Array2D.zeroCreateBased 0 0 height width
         }
         b
-
-type Todo =
-    { Id : Guid
-      Description : string }
-
-module Todo =
-    let isValid (description: string) =
-        String.IsNullOrWhiteSpace description |> not
-
-    let create (description: string) =
-        { Id = Guid.NewGuid()
-          Description = description }
 
 module Route =
     let builder typeName methodName =
         sprintf "/api/%s/%s" typeName methodName
 
-type ITodosApi =
-    { getTodos : unit -> Async<Todo list>
-      addTodo : Todo -> Async<Todo>
-      board: unit -> Async<ActiveBoard<int>> }
+type IMatchApi =
+    {
+      board: unit -> Async<ActiveBoard<int>>
+    }

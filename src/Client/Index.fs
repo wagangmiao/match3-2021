@@ -8,45 +8,30 @@ open Shared
 open Browser
 open Fable.Core
 type Model =
-    { Todos: Todo list
-      Input: string
+    {
       MouseX: float
       MouseY: float
     }
 
 type Msg =
-    | GotTodos of Todo list
-    | SetInput of string
-    | AddTodo
-    | AddedTodo of Todo
     | MouseDownEvent of x:float * y:float
 
-let todosApi =
+let matchApi =
     Remoting.createApi()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<ITodosApi>
+    |> Remoting.buildProxy<IMatchApi>
 
 let init(): Model * Cmd<Msg> =
     let model =
-        { Todos = []
-          Input = ""
+        {
           MouseX = 0.
-          MouseY = 0. }
-    let cmd = Cmd.OfAsync.perform todosApi.getTodos () GotTodos
+          MouseY = 0.
+        }
+    let cmd = Cmd.none
     model, cmd
 
 let update (msg: Msg) (model: Model): Model * Cmd<Msg> =
     match msg with
-    | GotTodos todos ->
-        { model with Todos = todos }, Cmd.none
-    | SetInput value ->
-        { model with Input = value }, Cmd.none
-    | AddTodo ->
-        let todo = Todo.create model.Input
-        let cmd = Cmd.OfAsync.perform todosApi.addTodo todo AddedTodo
-        { model with Input = "" }, cmd
-    | AddedTodo todo ->
-        { model with Todos = model.Todos @ [ todo ] }, Cmd.none
     | MouseDownEvent (x, y) ->
         {
             model with MouseX = x; MouseY = y
