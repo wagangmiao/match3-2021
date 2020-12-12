@@ -1,9 +1,11 @@
 module Index
 
+open Browser.Types
 open Elmish
 open Fable.Remoting.Client
 open Shared
-
+open Browser
+open Fable.Core
 type Model =
     { Todos: Todo list
       Input: string }
@@ -82,8 +84,16 @@ let containerBox (model : Model) (dispatch : Msg -> unit) =
             ]
         ]
     ]
+let canvasInit() =
+    let canvas = document.querySelector(".view") :?> HTMLCanvasElement
+    let ctx = canvas.getContext_2d()
+    ctx.fillStyle <- U3.Case1 "rgb(200,0,0)"
+    ctx.fillRect (0., 0., 500., 500.)
+    ctx.fillStyle <- U3.Case1 "rgba(0, 0, 200, 0.5)"
+    ctx.fillRect (30., 30., 55., 50.)
 
 let view (model : Model) (dispatch : Msg -> unit) =
+    canvasInit()
     Hero.hero [
         Hero.Color IsPrimary
         Hero.IsFullHeight
@@ -112,3 +122,5 @@ let view (model : Model) (dispatch : Msg -> unit) =
             ]
         ]
     ]
+
+
