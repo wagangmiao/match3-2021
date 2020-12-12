@@ -1,26 +1,25 @@
 namespace Shared
 
+type Cell<'T> =
+    {
+        value: 'T
+    }
 open System
-type ActiveBoard<'CellType> =
+type ActiveBoard =
     {
         height: int
         width: int
-        cells: 'CellType[,]
+        cells: Cell<int>[,]
     }
 
-type Cell<'T> =
-    {
-        x: int
-        y: int
-        value: 'T
-    }
+
 
 module Match3 =
     let make_board height width =
         let b = {
             height = height
             width = width
-            cells = Array2D.zeroCreateBased 0 0 height width
+            cells = Array2D.create height width {value = 0}
         }
         b
 
@@ -30,5 +29,5 @@ module Route =
 
 type IMatchApi =
     {
-      board: unit -> Async<ActiveBoard<int>>
+      board: unit -> Async<ActiveBoard>
     }

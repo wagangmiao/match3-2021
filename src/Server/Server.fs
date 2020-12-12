@@ -6,7 +6,7 @@ open Saturn
 
 open Shared
 
-let todosApi =
+let matchApi =
     {
       board =
         fun () -> async {
@@ -17,7 +17,7 @@ let todosApi =
 let webApp =
     Remoting.createApi()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.fromValue todosApi
+    |> Remoting.fromValue matchApi
     |> Remoting.buildHttpHandler
 
 let app =

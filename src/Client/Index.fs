@@ -11,11 +11,12 @@ type Model =
     {
       MouseX: float
       MouseY: float
+      Board: ActiveBoard
     }
 
 type Msg =
     | MouseDownEvent of x:float * y:float
-
+    | Board of ActiveBoard
 let matchApi =
     Remoting.createApi()
     |> Remoting.withRouteBuilder Route.builder
@@ -26,7 +27,9 @@ let init(): Model * Cmd<Msg> =
         {
           MouseX = 0.
           MouseY = 0.
+          Board = Match3.make_board 3 3
         }
+    let board = Cmd.OfAsync.perform matchApi.board ()
     let cmd = Cmd.none
     model, cmd
 
@@ -36,7 +39,10 @@ let update (msg: Msg) (model: Model): Model * Cmd<Msg> =
         {
             model with MouseX = x; MouseY = y
         }, Cmd.none
-
+    | Board board ->
+        {
+            model with Board = board
+        }, Cmd.none
 open Fulma
 
 
@@ -53,8 +59,8 @@ let canvasInit (model : Model) (dispatch : Msg -> unit) =
     ctx.fillRect (0., 0., 500., 500.)
     ctx.fillStyle <- style1
 
-    for i in 0 .. gridSize - 1 do
-        for j in 0 .. gridSize - 1 do
+    for i in 0 .. model.Board.height - 1 do
+        for j in 0 .. model.Board.height - 1 do
             let x = (float)i * gridWidth + gap
             let y = (float)j * gridWidth + gap
             let w = gridWidth - 2. * gap
