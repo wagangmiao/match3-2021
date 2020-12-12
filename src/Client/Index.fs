@@ -87,40 +87,26 @@ let containerBox (model : Model) (dispatch : Msg -> unit) =
 let canvasInit() =
     let canvas = document.querySelector(".view") :?> HTMLCanvasElement
     let ctx = canvas.getContext_2d()
-    ctx.fillStyle <- U3.Case1 "rgb(200,0,0)"
-    ctx.fillRect (0., 0., 500., 500.)
-    ctx.fillStyle <- U3.Case1 "rgba(0, 0, 200, 0.5)"
-    ctx.fillRect (30., 30., 55., 50.)
+    let style1 = U3.Case1 "rgb(200,200,0)"
+    let style2 =  U3.Case1 "rgba(0, 0, 200, 0.5)"
+    let gridWidth = 50.
+    let gridSize = 10
+    let gap = 3.
+    //ctx.fillStyle <- style1
+    //ctx.fillRect (0., 0., 500., 500.)
+    ctx.fillStyle <- style1
+
+    for i in 0 .. gridSize - 1 do
+        for j in 0 .. gridSize - 1 do
+            let x = (float)i * gridWidth + gap
+            let y = (float)j * gridWidth + gap
+            let w = gridWidth - 2. * gap
+            let h = w
+            ctx.fillRect (x, y, w, h)
+
+
+
+
 
 let view (model : Model) (dispatch : Msg -> unit) =
     canvasInit()
-    Hero.hero [
-        Hero.Color IsPrimary
-        Hero.IsFullHeight
-        Hero.Props [
-            Style [
-                Background """linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://unsplash.it/1200/900?random") no-repeat center center fixed"""
-                BackgroundSize "cover"
-            ]
-        ]
-    ] [
-        Hero.head [ ] [
-            Navbar.navbar [ ] [
-                Container.container [ ] [ navBrand ]
-            ]
-        ]
-
-        Hero.body [ ] [
-            Container.container [ ] [
-                Column.column [
-                    Column.Width (Screen.All, Column.Is6)
-                    Column.Offset (Screen.All, Column.Is3)
-                ] [
-                    Heading.p [ Heading.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ] [ str "match3_2021" ]
-                    containerBox model dispatch
-                ]
-            ]
-        ]
-    ]
-
-
