@@ -1,5 +1,6 @@
 module Index
 
+open System
 open Browser.Types
 open Elmish
 open Fable.Remoting.Client
@@ -8,13 +9,17 @@ open Browser
 open Fable.Core
 type Model =
     { Todos: Todo list
-      Input: string }
+      Input: string
+      MouseX: float
+      MouseY: float
+    }
 
 type Msg =
     | GotTodos of Todo list
     | SetInput of string
     | AddTodo
     | AddedTodo of Todo
+    | MouseDownEvent of x:float * y:float
 
 let todosApi =
     Remoting.createApi()
@@ -24,7 +29,9 @@ let todosApi =
 let init(): Model * Cmd<Msg> =
     let model =
         { Todos = []
-          Input = "" }
+          Input = ""
+          MouseX = 0.
+          MouseY = 0. }
     let cmd = Cmd.OfAsync.perform todosApi.getTodos () GotTodos
     model, cmd
 
@@ -40,60 +47,25 @@ let update (msg: Msg) (model: Model): Model * Cmd<Msg> =
         { model with Input = "" }, cmd
     | AddedTodo todo ->
         { model with Todos = model.Todos @ [ todo ] }, Cmd.none
+    | MouseDownEvent (x, y) ->
+        {
+            model with MouseX = x; MouseY = y
+        }, Cmd.none
 
-open Fable.React
-open Fable.React.Props
 open Fulma
 
-let navBrand =
-    Navbar.Brand.div [ ] [
-        Navbar.Item.a [
-            Navbar.Item.Props [ Href "https://safe-stack.github.io/" ]
-            Navbar.Item.IsActive true
-        ] [
-            img [
-                Src "/favicon.png"
-                Alt "Logo"
-            ]
-        ]
-    ]
 
-let containerBox (model : Model) (dispatch : Msg -> unit) =
-    Box.box' [ ] [
-        Content.content [ ] [
-            Content.Ol.ol [ ] [
-                for todo in model.Todos do
-                    li [ ] [ str todo.Description ]
-            ]
-        ]
-        Field.div [ Field.IsGrouped ] [
-            Control.p [ Control.IsExpanded ] [
-                Input.text [
-                  Input.Value model.Input
-                  Input.Placeholder "What needs to be done?"
-                  Input.OnChange (fun x -> SetInput x.Value |> dispatch) ]
-            ]
-            Control.p [ ] [
-                Button.a [
-                    Button.Color IsPrimary
-                    Button.Disabled (Todo.isValid model.Input |> not)
-                    Button.OnClick (fun _ -> dispatch AddTodo)
-                ] [
-                    str "Add"
-                ]
-            ]
-        ]
-    ]
-let canvasInit() =
+let canvasInit (model : Model) (dispatch : Msg -> unit) =
     let canvas = document.querySelector(".view") :?> HTMLCanvasElement
+    canvas.onmousedown <- fun (e) -> dispatch(MouseDownEvent(x = e.pageX, y = e.pageY))
+    canvas.onmousemove <- fun (e) -> dispatch(MouseDownEvent(x = e.pageX, y = e.pageY))
     let ctx = canvas.getContext_2d()
     let style1 = U3.Case1 "rgb(200,200,0)"
-    let style2 =  U3.Case1 "rgba(0, 0, 200, 0.5)"
     let gridWidth = 50.
     let gridSize = 10
     let gap = 3.
-    //ctx.fillStyle <- style1
-    //ctx.fillRect (0., 0., 500., 500.)
+    ctx.fillStyle <-  U3.Case1 "rgb(255,255,255)"
+    ctx.fillRect (0., 0., 500., 500.)
     ctx.fillStyle <- style1
 
     for i in 0 .. gridSize - 1 do
@@ -104,9 +76,11 @@ let canvasInit() =
             let h = w
             ctx.fillRect (x, y, w, h)
 
+    let style2 = U3.Case1 "rgb(0,200,0)"
+    ctx.fillStyle <- style2
+    ctx.fillRect(model.MouseX, model.MouseY, 10., 10.)
 
-
-
-
+open Fable.React
 let view (model : Model) (dispatch : Msg -> unit) =
-    canvasInit()
+    canvasInit model dispatch
+    Container.container [ ] [ ]
