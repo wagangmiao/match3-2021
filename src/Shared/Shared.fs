@@ -17,34 +17,30 @@ type Tile =
 type Cell =
     | Color of color: Color
     | Tile of tile: Tile
+
 open System
+
 type ActiveBoard =
-    {
-        height: int
-        width: int
-        cells: Map<int * int, Cell>
-    }
+    { height: int
+      width: int
+      cells: Map<int * int, Cell> }
 
 
 
 module Match3 =
     let make_board height width =
-        let b = {
-            height = height
-            width = width
-            cells = Map([|
-                          (0, 0), Color(color=Color.Red)
-                          (0, 0), Color(color=Color.Red)
-                          (0, 0), Color(color=Color.Red)
-                         |])
-        }
+        let b =
+            { height = height
+              width = width
+              cells =
+                  Map
+                      ([| (0, 0), Color(color = Color.Red)
+                          (0, 0), Color(color = Color.Red)
+                          (0, 0), Color(color = Color.Red) |]) }
+
         b
 
 module Route =
-    let builder typeName methodName =
-        sprintf "/api/%s/%s" typeName methodName
+    let builder typeName methodName = sprintf "/api/%s/%s" typeName methodName
 
-type IMatchApi =
-    {
-      board: unit -> Async<ActiveBoard>
-    }
+type IMatchApi = { board: unit -> Async<ActiveBoard> }
