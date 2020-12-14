@@ -7,6 +7,7 @@ module BlackWhite =
     type Color =
         | Black
         | White
+        | Blank
 
     type ChessBoard =
         { height: int
@@ -22,4 +23,25 @@ module BlackWhite =
           action: Action
           changes: Change list }
 
-    type Record = { turns: Turn list }
+    type Records = Turn list
+
+    type Game =
+        {
+            board: ChessBoard
+            records: Records
+            next_turn: Color
+            current_turn_number: int
+        }
+
+    let StartGame(): Game =
+        {
+            board = {
+                height = 8
+                width = 8
+                board = Array2D.create 8 8 Blank
+            }
+
+            records = []
+            next_turn = Black
+            current_turn_number = 1
+        }
