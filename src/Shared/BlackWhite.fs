@@ -111,7 +111,7 @@ module BlackWhite =
             let b = Array2D.copy board.board
 
             let f =
-                fun (x, y) -> (board.board.[y, x] <- color) in
+                fun (x, y) -> (b.[y, x] <- color) in
 
             List.iter f l
 
