@@ -1,6 +1,7 @@
 ﻿namespace Shared.Chess
 
 open System
+open System.ComponentModel.Design
 open System.Diagnostics
 open System.Runtime.InteropServices
 open System.Xml
@@ -55,7 +56,6 @@ module BlackWhite =
               records = []
               next_turn = Black
               current_turn_number = 1 }
-
         game.board.board.[3, 3] <- Black
         game.board.board.[4, 4] <- Black
         game.board.board.[3, 4] <- White
@@ -68,7 +68,7 @@ module BlackWhite =
         && x < board.width
         && y < board.height
 
-    let CheckOrChangeBoard (board: ChessBoard, color, x, y): Option<ChessBoard> =
+    let CheckOrChangeBoard (board: ChessBoard, color, x, y): Option<Change list> =
         let folder2 state x1 x2 =
             let folder state (x, y) =
                 match state with
@@ -108,16 +108,13 @@ module BlackWhite =
 
         match r with
         | (3, l) ->
-            let b = Array2D.copy board.board
-
-            let f =
-                fun (x, y) -> (b.[y, x] <- color) in
-
-            List.iter f l
-
-            Some({ board with board = b })
+            l
+            |> List.map (fun (x1, y1) -> { x = x1; y = y1; color = color })
+            |> Some
         | _ -> None
 
+    let DoChange (game: Game) (changes: Change list): Game =
+        game
     let NextTurn (game: Game, color: Color, x: int, y: int): Result<Game, GameError> =
         if game.next_turn <> color then
             Error NotValidColor
@@ -128,4 +125,7 @@ module BlackWhite =
         else
             match CheckOrChangeBoard(game.board, color, x, y) with
             | None -> Error InvalidPos
-            | Some (board) -> Ok { game with board = board }
+            | Some changes ->
+                Ok (DoChange game changes)
+
+
