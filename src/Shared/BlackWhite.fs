@@ -56,6 +56,7 @@ module BlackWhite =
               records = []
               next_turn = Black
               current_turn_number = 1 }
+
         game.board.board.[3, 3] <- Black
         game.board.board.[4, 4] <- Black
         game.board.board.[3, 4] <- White
@@ -68,7 +69,7 @@ module BlackWhite =
         && x < board.width
         && y < board.height
 
-    let CheckOrChangeBoard (board: ChessBoard, color, x, y): Option<Change list> =
+    let CheckBoardPos (board: ChessBoard, color, x, y): Option<Change list> =
         let folder2 state x1 x2 =
             let folder state (x, y) =
                 match state with
@@ -114,7 +115,11 @@ module BlackWhite =
         | _ -> None
 
     let DoChange (game: Game) (changes: Change list): Game =
-        game
+        let b = Array2D.copy game.board.board
+        List.iter (fun (c: Change) -> b.[c.y, c.x] <- c.color) changes
+
+        { game with board = { game.board with board = b } }
+
     let NextTurn (game: Game, color: Color, x: int, y: int): Result<Game, GameError> =
         if game.next_turn <> color then
             Error NotValidColor
@@ -123,9 +128,6 @@ module BlackWhite =
         elif game.board.board.[y, x] <> Blank then
             Error PosHasChess
         else
-            match CheckOrChangeBoard(game.board, color, x, y) with
+            match CheckBoardPos(game.board, color, x, y) with
             | None -> Error InvalidPos
-            | Some changes ->
-                Ok (DoChange game changes)
-
-
+            | Some changes -> Ok(DoChange game changes)
