@@ -1,11 +1,5 @@
 ﻿namespace Shared.Chess
 
-open System
-open System.ComponentModel.Design
-open System.Diagnostics
-open System.Runtime.InteropServices
-open System.Xml
-
 module BlackWhite =
     type Color =
         | Black
@@ -68,7 +62,9 @@ module BlackWhite =
 
     let CheckBoardPos (board: ChessBoard, color, x, y): Option<Change list> =
         let folder2 state x1 x2 =
-            let folder state (x, y) =
+            let folder state (xx, yy) =
+                let x = x + xx
+                let y = y + yy
                 match state with
                 | (0, l) ->
                     if ValidPos board x y && board.board.[y, x] = Blank
