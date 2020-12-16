@@ -22,14 +22,11 @@ module BlackWhite =
         { height: int
           width: int
           board: Color [,] }
-
-    type Action = { x: int; y: int; color: Color }
-
     type Change = { x: int; y: int; color: Color }
 
     type Turn =
         { turn_number: int
-          action: Action
+          action: Change
           changes: Change list }
 
     type Records = Turn list
@@ -130,4 +127,11 @@ module BlackWhite =
         else
             match CheckBoardPos(game.board, color, x, y) with
             | None -> Error InvalidPos
-            | Some changes -> Ok(DoChange game changes)
+            | Some changes ->
+                let g = DoChange game ({x=x;y=y;color=color}::changes)
+                let action = {x=x;y=y;color=color}
+                let turn = {action = action; changes = changes; turn_number = g.current_turn_number + 1}
+                Ok {
+                    g with records = turn::g.records;current_turn_number = turn.turn_number; next_turn = opposite_color color
+                }
+
