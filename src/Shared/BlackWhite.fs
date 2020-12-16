@@ -22,6 +22,7 @@ module BlackWhite =
         { height: int
           width: int
           board: Color [,] }
+
     type Change = { x: int; y: int; color: Color }
 
     type Turn =
@@ -53,7 +54,6 @@ module BlackWhite =
               records = []
               next_turn = Black
               current_turn_number = 1 }
-
         game.board.board.[3, 3] <- Black
         game.board.board.[4, 4] <- Black
         game.board.board.[3, 4] <- White
@@ -115,7 +115,8 @@ module BlackWhite =
         let b = Array2D.copy game.board.board
         List.iter (fun (c: Change) -> b.[c.y, c.x] <- c.color) changes
 
-        { game with board = { game.board with board = b } }
+        { game with
+              board = { game.board with board = b } }
 
     let NextTurn (game: Game, color: Color, x: int, y: int): Result<Game, GameError> =
         if game.next_turn <> color then
@@ -128,10 +129,18 @@ module BlackWhite =
             match CheckBoardPos(game.board, color, x, y) with
             | None -> Error InvalidPos
             | Some changes ->
-                let g = DoChange game ({x=x;y=y;color=color}::changes)
-                let action = {x=x;y=y;color=color}
-                let turn = {action = action; changes = changes; turn_number = g.current_turn_number + 1}
-                Ok {
-                    g with records = turn::g.records;current_turn_number = turn.turn_number; next_turn = opposite_color color
-                }
+                let g =
+                    DoChange game ({ x = x; y = y; color = color } :: changes)
 
+                let action = { x = x; y = y; color = color }
+
+                let turn =
+                    { action = action
+                      changes = changes
+                      turn_number = g.current_turn_number + 1 }
+
+                Ok
+                    { g with
+                          records = turn :: g.records
+                          current_turn_number = turn.turn_number
+                          next_turn = opposite_color color }
