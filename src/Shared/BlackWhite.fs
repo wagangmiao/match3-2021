@@ -1,6 +1,7 @@
-﻿namespace Shared.Chess
+﻿namespace Chess
 
 module BlackWhite =
+
     type Color =
         | Black
         | White
@@ -15,7 +16,11 @@ module BlackWhite =
     type ChessBoard =
         { height: int
           width: int
-          board: Color [,] }
+          board: Color [] }
+
+    let GetPos (b: ChessBoard) x y = b.board.[y * b.width + x]
+
+    let SetPos (b: ChessBoard) x y color = b.board.[y * b.width + x] <- color
 
     type Change = { x: int; y: int; color: Color }
 
@@ -43,15 +48,16 @@ module BlackWhite =
             { board =
                   { height = 8
                     width = 8
-                    board = Array2D.create 8 8 Blank }
+                    board = Array.create 64 Blank }
 
               records = []
               next_turn = Black
               current_turn_number = 1 }
-        game.board.board.[3, 3] <- Black
-        game.board.board.[4, 4] <- Black
-        game.board.board.[3, 4] <- White
-        game.board.board.[4, 3] <- White
+
+        SetPos game.board 3 3 Black
+        SetPos game.board 4 4 Black
+        SetPos game.board 4 3 White
+        SetPos game.board 3 4 White
         game
 
     let ValidPos board x y =
@@ -65,24 +71,25 @@ module BlackWhite =
             let folder state (xx, yy) =
                 let x = x + xx
                 let y = y + yy
+
                 match state with
                 | (0, l) ->
-                    if ValidPos board x y && board.board.[y, x] = Blank
+                    if ValidPos board x y && GetPos board x y = Blank
                     then (1, l)
                     else (-1, l)
                 | (-1, l) -> (-1, l)
                 | (-2, l) -> (-2, l)
                 | (1, l) ->
                     if ValidPos board x y
-                       && board.board.[y, x] = opposite_color (color) then
+                       && GetPos board x y = opposite_color (color) then
                         (2, (x, y) :: l)
                     else
                         (-1, l)
                 | (2, l) ->
                     if ValidPos board x y
-                       && board.board.[y, x] = opposite_color (color) then
+                       && GetPos board x y = opposite_color (color) then
                         (2, (x, y) :: l)
-                    elif ValidPos board x y && board.board.[y, x] = color then
+                    elif ValidPos board x y && GetPos board x y = color then
                         (3, l)
                     else
                         (-2, l)
@@ -108,18 +115,20 @@ module BlackWhite =
         | _ -> None
 
     let DoChange (game: Game) (changes: Change list): Game =
-        let b = Array2D.copy game.board.board
-        List.iter (fun (c: Change) -> b.[c.y, c.x] <- c.color) changes
+        let b =
+            { game.board with
+                  board = Array.copy game.board.board }
 
-        { game with
-              board = { game.board with board = b } }
+        List.iter (fun (c: Change) -> SetPos b c.x c.y c.color) changes
+
+        { game with board = b }
 
     let NextTurn (game: Game, color: Color, x: int, y: int): Result<Game, GameError> =
         if game.next_turn <> color then
             Error NotValidColor
         elif not (ValidPos game.board x y) then
             Error PosOutRange
-        elif game.board.board.[y, x] <> Blank then
+        elif GetPos game.board x y <> Blank then
             Error PosHasChess
         else
             match CheckBoardPos(game.board, color, x, y) with

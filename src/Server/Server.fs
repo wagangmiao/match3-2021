@@ -5,19 +5,20 @@ open Fable.Remoting.Giraffe
 open Saturn
 
 open Shared
+open Chess
 
-let matchApi =
+let blackWhiteApi =
     {
-      board =
+      game =
         fun () -> async {
-            return Match3.make_board 3 3
+            return BlackWhite.StartGame()
         }
     }
 
 let webApp =
     Remoting.createApi()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.fromValue matchApi
+    |> Remoting.fromValue blackWhiteApi
     |> Remoting.buildHttpHandler
 
 let app =
